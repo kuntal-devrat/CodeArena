@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2d3a;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3a3d4a;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply text-arena-muted hover:text-white hover:bg-arena-surface px-4 py-2 rounded-lg transition-colors;
+  }
+
+  .card {
+    @apply bg-arena-surface border border-arena-border rounded-xl p-4;
+  }
+
+  .difficulty-badge {
+    @apply text-xs font-semibold px-2 py-0.5 rounded-full;
+  }
+  .difficulty-badge.easy {
+    @apply bg-green-500/20 text-difficulty-easy;
+  }
+  .difficulty-badge.medium {
+    @apply bg-yellow-500/20 text-difficulty-medium;
+  }
+  .difficulty-badge.hard {
+    @apply bg-red-500/20 text-difficulty-hard;
+  }
+}
