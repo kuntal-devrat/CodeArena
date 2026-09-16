@@ -36,4 +36,30 @@ export const judgeService = {
       data: { verdict, runtime, memory, errorMessage },
     });
   },
+
+  async run(req: {
+    code: string;
+    language: string;
+    testCases: object[];
+    timeoutMs?: number;
+    memoryLimitMb?: number;
+  }): Promise<{
+    verdict: string;
+    runtime: number;
+    memory: number | null;
+    errorMessage?: string;
+    testCaseResults: any[];
+  }> {
+    const response = await axios.post(`${JUDGE_URL}/run`, {
+      code: req.code,
+      language: req.language,
+      testCases: req.testCases,
+      isRun: true,
+      timeoutMs: req.timeoutMs ?? parseInt(process.env.JUDGE_TIMEOUT_MS ?? "5000"),
+      memoryLimitMb: req.memoryLimitMb ?? parseInt(process.env.JUDGE_MEMORY_LIMIT_MB ?? "256"),
+    });
+
+    return response.data;
+  },
 };
+

@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -26,56 +26,56 @@ model Problem {
   id          String   @id @default(cuid())
   slug        String   @unique
   title       String
-  difficulty  Difficulty
-  tags        String[]
+  difficulty  String   @default("EASY") // EASY, MEDIUM, HARD
+  tags        String   @default("[]")   // JSON stringified array of tag strings
   description String
-  examples    Json
-  constraints String[]
-  starterCode Json     // { python: "...", javascript: "..." }
-  testCases   Json     // hidden test cases for judge
+  examples    String   @default("[]")   // JSON stringified array of examples
+  constraints String   @default("[]")   // JSON stringified array of constraints
+  starterCode String   @default("{}")   // JSON stringified map of language -> code
+  testCases   String   @default("[]")   // JSON stringified array of test cases
   createdAt   DateTime @default(now())
 
   submissions Submission[]
 }
 
 model Submission {
-  id           String            @id @default(cuid())
+  id           String   @id @default(cuid())
   userId       String
   problemId    String
   language     String
   code         String
-  verdict      SubmissionVerdict @default(PENDING)
+  verdict      String   @default("PENDING")
   runtime      Int?
   memory       Int?
   errorMessage String?
-  submittedAt  DateTime          @default(now())
+  submittedAt  DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
   problem Problem @relation(fields: [problemId], references: [id])
 }
 
 model Room {
-  id         String         @id @default(cuid())
+  id         String    @id @default(cuid())
   name       String
-  mode       RoomMode       @default(FREE_PRACTICE)
-  visibility RoomVisibility @default(FRIENDS)
+  mode       String    @default("FREE_PRACTICE")
+  visibility String    @default("FRIENDS")
   hostId     String
   problemId  String?
   startedAt  DateTime?
   endsAt     DateTime?
-  createdAt  DateTime       @default(now())
+  createdAt  DateTime  @default(now())
 
   members      RoomMember[]
   peekRequests PeekRequest[]
 }
 
 model RoomMember {
-  id       String           @id @default(cuid())
+  id       String   @id @default(cuid())
   roomId   String
   userId   String
-  status   MemberStatus     @default(IDLE)
-  isHost   Boolean          @default(false)
-  joinedAt DateTime         @default(now())
+  status   String   @default("IDLE")
+  isHost   Boolean  @default(false)
+  joinedAt DateTime @default(now())
 
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
@@ -84,60 +84,16 @@ model RoomMember {
 }
 
 model PeekRequest {
-  id              String      @id @default(cuid())
+  id              String    @id @default(cuid())
   roomId          String
   requesterId     String
   targetId        String
-  status          PeekStatus  @default(PENDING)
-  durationSeconds Int         @default(90)
-  createdAt       DateTime    @default(now())
+  status          String    @default("PENDING")
+  durationSeconds Int       @default(90)
+  createdAt       DateTime  @default(now())
   expiresAt       DateTime?
 
   room      Room @relation(fields: [roomId], references: [id])
   requester User @relation("requester", fields: [requesterId], references: [id])
   target    User @relation("target", fields: [targetId], references: [id])
-}
-
-enum Difficulty {
-  EASY
-  MEDIUM
-  HARD
-}
-
-enum SubmissionVerdict {
-  PENDING
-  RUNNING
-  ACCEPTED
-  WRONG_ANSWER
-  TIME_LIMIT_EXCEEDED
-  MEMORY_LIMIT_EXCEEDED
-  RUNTIME_ERROR
-  COMPILE_ERROR
-}
-
-enum RoomMode {
-  FREE_PRACTICE
-  SAME_PROBLEM
-  HEAD_TO_HEAD
-}
-
-enum RoomVisibility {
-  PRIVATE
-  FRIENDS
-  PUBLIC
-}
-
-enum MemberStatus {
-  IDLE
-  CODING
-  SUBMITTED
-  SPECTATING
-}
-
-enum PeekStatus {
-  PENDING
-  APPROVED
-  DENIED
-  EXPIRED
-  REVOKED
 }

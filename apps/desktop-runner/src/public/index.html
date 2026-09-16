@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeArena Hardware Executor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --m3-surface: #141218;
+      --m3-surface-dim: #110f14;
+      --m3-surface-container-low: #1d1b20;
+      --m3-surface-container: #211f26;
+      --m3-surface-container-high: #2b2930;
+      --m3-surface-container-highest: #36343b;
+      --m3-on-surface: #e6e1e5;
+      --m3-on-surface-variant: #cac4d0;
+      --m3-outline: #938f99;
+      --m3-outline-variant: #49454f;
+      --m3-primary: #a8c7fa;
+      --m3-on-primary: #062e6f;
+      --m3-primary-container: #0842a0;
+      --m3-on-primary-container: #d3e3fd;
+      --m3-success: #6dd58c;
+      --m3-success-container: rgba(13, 59, 26, 0.5);
+      --m3-warning: #ffba38;
+      --m3-error: #f2b8b5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--m3-surface);
+      color: var(--m3-on-surface);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    code, pre { font-family: 'Roboto Mono', monospace; }
+
+    header {
+      background-color: var(--m3-surface-container-low);
+      border-bottom: 1px solid var(--m3-outline-variant);
+      padding: 0.875rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      background: linear-gradient(135deg, #a8c7fa 0%, #0842a0 100%);
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #062e6f;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--m3-success-container);
+      color: var(--m3-success);
+      border: 1px solid rgba(109, 213, 140, 0.4);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+    }
+
+    .status-pulse {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background-color: var(--m3-success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(109, 213, 140, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(109, 213, 140, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(109, 213, 140, 0); }
+    }
+
+    main {
+      max-width: 1000px;
+      width: 100%;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      flex: 1;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .m3-card {
+      background-color: var(--m3-surface-container);
+      border: 1px solid var(--m3-outline-variant);
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--m3-on-surface);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(73, 69, 79, 0.4);
+      font-size: 0.85rem;
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      color: var(--m3-on-surface-variant);
+    }
+
+    .stat-val {
+      font-weight: 500;
+      color: var(--m3-on-surface);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .runtime-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--m3-surface-container-high);
+      border: 1px solid var(--m3-outline-variant);
+      border-radius: 0.75rem;
+      padding: 0.625rem 0.875rem;
+      font-size: 0.85rem;
+    }
+
+    .runtime-badge.ready {
+      border-color: rgba(109, 213, 140, 0.4);
+      background-color: rgba(13, 59, 26, 0.2);
+    }
+
+    .runtime-badge.missing {
+      opacity: 0.6;
+    }
+
+    .tag-ready {
+      color: var(--m3-success);
+      font-weight: 600;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .tag-missing {
+      color: var(--m3-on-surface-variant);
+      font-size: 0.75rem;
+    }
+
+    .console-box {
+      background-color: #0b0a0e;
+      border: 1px solid var(--m3-outline-variant);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.8rem;
+      color: #cac4d0;
+      min-height: 180px;
+      max-height: 260px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .console-box .log-time { color: #8e919a; margin-right: 0.5rem; }
+    .console-box .log-success { color: #6dd58c; }
+    .console-box .log-info { color: #a8c7fa; }
+    .console-box .log-warn { color: #ffba38; }
+
+    .btn {
+      background-color: var(--m3-primary);
+      color: var(--m3-on-primary);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      text-decoration: none;
+      transition: filter 0.2s;
+    }
+    .btn:hover { filter: brightness(1.1); }
+
+    footer {
+      text-align: center;
+      padding: 1.25rem;
+      color: var(--m3-on-surface-variant);
+      font-size: 0.75rem;
+      border-top: 1px solid rgba(73, 69, 79, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-group">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <h1 style="font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em;">CodeArena Desktop Runner</h1>
+        <p style="font-size: 0.75rem; color: var(--m3-on-surface-variant);">Direct Local Hardware Execution Engine</p>
+      </div>
+    </div>
+    <div class="status-badge" id="runner-status">
+      <span class="status-pulse"></span>
+      <span>READY ON PORT 5001</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid-2">
+      <!-- Hardware Telemetry -->
+      <div class="m3-card">
+        <div class="card-title">
+          <span>💻</span>
+          <span>Host Hardware Telemetry</span>
+        </div>
+        <div>
+          <div class="stat-row">
+            <span class="stat-label">CPU Model</span>
+            <span class="stat-val" id="hw-cpu">Detecting...</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">CPU Cores / Threads</span>
+            <span class="stat-val" id="hw-cores">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">System Memory (RAM)</span>
+            <span class="stat-val" id="hw-ram">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Operating System</span>
+            <span class="stat-val" id="hw-os">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Server Cloud Cost</span>
+            <span class="stat-val" style="color: var(--m3-success); font-weight: 700;">$0.00 (100% Free)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Execution Stats -->
+      <div class="m3-card">
+        <div class="card-title">
+          <span>⚡</span>
+          <span>Execution Performance</span>
+        </div>
+        <div>
+          <div class="stat-row">
+            <span class="stat-label">Total Local Executions</span>
+            <span class="stat-val" id="stat-total" style="color: var(--m3-primary); font-size: 1rem;">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Average Execution Latency</span>
+            <span class="stat-val" id="stat-latency">&lt; 15 ms (Direct Host CPU)</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Web Client Pairing</span>
+            <span class="stat-val" style="color: var(--m3-success);">Auto-Connects with CodeArena</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Local Port</span>
+            <span class="stat-val">127.0.0.1:5001</span>
+          </div>
+          <div class="stat-row" style="padding-top: 0.75rem;">
+            <a href="http://localhost:3000/problems/two-sum" target="_blank" class="btn">
+              <span>Open CodeArena Web App</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detected Runtimes -->
+    <div class="m3-card">
+      <div class="card-title" style="justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>⚙️</span>
+          <span>Detected Compilers & Interpreters</span>
+        </div>
+        <button onclick="refreshStatus()" style="background: transparent; border: 1px solid var(--m3-outline-variant); color: var(--m3-primary); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; cursor: pointer;">
+          Rescan Hardware
+        </button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;" id="runtimes-grid">
+        <div class="runtime-badge">Loading compilers...</div>
+      </div>
+    </div>
+
+    <!-- Live Execution Logs -->
+    <div class="m3-card">
+      <div class="card-title">
+        <span>📜</span>
+        <span>Hardware Runner Activity Log</span>
+      </div>
+      <div class="console-box" id="console-logs">
+        <div><span class="log-time">[System]</span><span class="log-info">Hardware Executor daemon initialized on port 5001.</span></div>
+        <div><span class="log-time">[System]</span><span>Listening for execution requests from CodeArena web app...</span></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    CodeArena Desktop Hardware Runner &bull; Native Hardware Execution Engine &bull; Zero Cloud Cost
+  </footer>
+
+  <script>
+    async function refreshStatus() {
+      try {
+        const res = await fetch('/status');
+        const data = await res.json();
+
+        // Hardware
+        document.getElementById('hw-cpu').textContent = data.hardware.cpuModel;
+        document.getElementById('hw-cores').textContent = `${data.hardware.cpuCores} Threads`;
+        document.getElementById('hw-ram').textContent = `${data.hardware.freeMemoryGb} GB free / ${data.hardware.totalMemoryGb} GB total`;
+        document.getElementById('hw-os').textContent = `${data.hardware.os} (${data.hardware.arch})`;
+
+        // Stats
+        document.getElementById('stat-total').textContent = data.totalExecutions || 0;
+
+        // Runtimes
+        const grid = document.getElementById('runtimes-grid');
+        grid.innerHTML = '';
+        for (const [lang, info] of Object.entries(data.runtimes)) {
+          const badge = document.createElement('div');
+          badge.className = `runtime-badge ${info.available ? 'ready' : 'missing'}`;
+          badge.innerHTML = `
+            <div>
+              <span style="font-weight: 600; text-transform: capitalize;">${lang}</span>
+              ${info.version ? `<span style="font-size: 0.7rem; color: #8e919a; margin-left: 0.35rem;">(${info.version.slice(0, 18)})</span>` : ''}
+            </div>
+            <span class="${info.available ? 'tag-ready' : 'tag-missing'}">
+              ${info.available ? '✓ Installed' : '✗ Not Found'}
+            </span>
+          `;
+          grid.appendChild(badge);
+        }
+      } catch (err) {
+        console.error('Failed to fetch runner status', err);
+      }
+    }
+
+    // Refresh every 5 seconds
+    refreshStatus();
+    setInterval(refreshStatus, 5000);
+  </script>
+</body>
+</html>

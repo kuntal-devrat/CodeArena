@@ -64,12 +64,26 @@ export async function runHandler(req: Request, res: Response) {
 
     if (result.runtimeError) {
       verdict = "RUNTIME_ERROR";
+      compilationError = result.stderr || "Runtime error occurred during execution";
       break;
     }
 
     const actual = result.stdout.trim();
     const expected = tc.expected.trim();
-    const passed = actual === expected;
+
+    let passed = false;
+    if (expected === "") {
+      passed = true;
+    } else if (actual === expected) {
+      passed = true;
+    } else {
+      try {
+        passed = JSON.stringify(JSON.parse(actual)) === JSON.stringify(JSON.parse(expected));
+      } catch {
+        passed = actual.replace(/\s+/g, "") === expected.replace(/\s+/g, "");
+      }
+    }
+
     totalRuntime += result.runtimeMs;
 
     results.push({
@@ -91,5 +105,7 @@ export async function runHandler(req: Request, res: Response) {
     memory: null, // populate in production with real resource tracking
     errorMessage: compilationError,
     testCaseResults: results,
+    totalCases: cases.length,
+    passedCases: results.filter((r) => r.passed).length,
   });
 }

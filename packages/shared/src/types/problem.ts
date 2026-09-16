@@ -16,6 +16,7 @@ export interface Problem {
   examples: Example[];
   constraints: string[];
   starterCode: Record<string, string>; // language -> starter snippet
+  testCases?: Array<{ input: string; expected: string }> | string;
   createdAt: string;
 }
 

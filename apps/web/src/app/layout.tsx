@@ -1,13 +1,21 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Roboto, Roboto_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import { Navbar } from "@/components/Navbar";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const jetbrainsMono = JetBrains_Mono({
+const roboto = Roboto({
+  weight: ["300", "400", "500", "700"],
   subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
+  variable: "--font-roboto",
 });
+
+const robotoMono = Roboto_Mono({
+  weight: ["400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--font-roboto-mono",
+});
+
 
 export const metadata: Metadata = {
   title: "CodeArena — Social Competitive Coding",
@@ -28,9 +36,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} bg-arena-bg text-white antialiased`}
+        className={`${roboto.variable} ${robotoMono.variable} font-sans bg-m3-surface text-m3-on-surface antialiased min-h-screen flex flex-col`}
       >
-        {children}
+
+        <Navbar />
+        <div className="flex-1 flex flex-col">{children}</div>
         <Toaster
           position="bottom-right"
           toastOptions={{

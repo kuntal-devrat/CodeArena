@@ -9,8 +9,10 @@
     "typecheck": "tsc --noEmit",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "scrape:leetcode": "python ../../tools/scraper/leetcode_scraper.py"
   },
+
   "dependencies": {
     "@codearena/shared": "*",
     "@prisma/client": "^5.16.0",

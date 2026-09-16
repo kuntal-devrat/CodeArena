@@ -25,7 +25,6 @@ yarn-error.log*
 Thumbs.db
 
 # IDE
-.vscode
 .idea
 
 # Turbo
@@ -34,3 +33,12 @@ Thumbs.db
 # Prisma
 apps/api/prisma/dev.db
 apps/api/prisma/dev.db-journal
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Python
+.venv
+__pycache__
+*.pyc
+

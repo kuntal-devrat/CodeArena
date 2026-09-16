@@ -27,6 +27,24 @@ export function requireAuth(
   }
 }
 
+export function optionalAuth(
+  req: AuthRequest,
+  _res: Response,
+  next: NextFunction
+) {
+  const header = req.headers.authorization;
+  if (header?.startsWith("Bearer ")) {
+    const token = header.slice(7);
+    try {
+      const payload = jwt.verify(token, JWT_SECRET) as { userId: string };
+      req.userId = payload.userId;
+    } catch {
+      // Ignore expired or invalid token for optional auth
+    }
+  }
+  next();
+}
+
 export function signToken(userId: string): string {
   return jwt.sign({ userId }, JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
